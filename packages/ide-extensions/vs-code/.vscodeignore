@@ -1,0 +1,13 @@
+**
+!dist/extension.cjs
+!dist/analysis-worker.cjs
+!dist/parser-assets/**
+!dist/licenses/**
+!dist/webview-assets/webview.css
+!dist/webview-assets/webview.js
+!README.md
+!CHANGELOG.md
+!LICENSE.txt
+!THIRD_PARTY_NOTICES.txt
+!resources/benode.svg
+!resources/benode.png

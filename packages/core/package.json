@@ -1,0 +1,23 @@
+{
+  "name": "@benode/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json --pretty false",
+    "test": "tsc -p tsconfig.test.json --pretty false && vitest run",
+    "lint": "eslint src test --max-warnings=0"
+  }
+}
+

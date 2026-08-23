@@ -1,0 +1,10 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/core" },
+    { "path": "packages/parser/spring-java" },
+    { "path": "packages/ide-extensions/vs-code" },
+    { "path": "packages/ui/graph-view" }
+  ]
+}
+

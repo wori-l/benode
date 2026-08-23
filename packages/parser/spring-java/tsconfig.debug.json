@@ -1,0 +1,22 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "declaration": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noEmit": false,
+    "outDir": "dist-debug",
+    "rootDir": ".",
+    "sourceMap": true,
+    "tsBuildInfoFile": "dist-debug/debug.tsbuildinfo",
+    "types": ["node"]
+  },
+  "include": [
+    "src/**/*.ts",
+    "debug/**/*.ts"
+  ],
+  "references": [
+    { "path": "../../core" }
+  ]
+}

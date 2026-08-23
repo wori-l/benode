@@ -1,0 +1,30 @@
+{
+  "name": "benode",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "workspaces": [
+    "packages/core",
+    "packages/ide-extensions/vs-code",
+    "packages/parser/spring-java",
+    "packages/ui/graph-view"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace @benode/core && npm run build --workspace @benode/spring-java && npm run build --workspace @benode/graph-view && npm run build --workspace packages/ide-extensions/vs-code",
+    "benchmark:analysis": "npm run benchmark:analysis --workspace @benode/spring-java",
+    "benchmark:acceptance": "npm run benchmark:acceptance --workspace @benode/spring-java",
+    "package:vsix": "npm run build && npm run package:vsix --workspace packages/ide-extensions/vs-code",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.1.2",
+    "@vscode/vsce": "^3.9.2",
+    "esbuild": "^0.28.1",
+    "eslint": "^10.8.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.65.0",
+    "vitest": "^4.1.10"
+  }
+}

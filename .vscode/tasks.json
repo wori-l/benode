@@ -1,0 +1,16 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Benode",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-lc",
+                "npm run build"
+            ],
+            "problemMatcher": "$tsc",
+            "group": "build"
+        }
+    ]
+}

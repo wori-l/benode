@@ -1,0 +1,30 @@
+{
+  "name": "@benode/spring-java",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "queries"
+  ],
+  "scripts": {
+    "benchmark:analysis": "tsc -p tsconfig.benchmark.json --pretty false && vitest bench --run benchmark/workspace-analysis.bench.ts",
+    "benchmark:acceptance": "tsc -p tsconfig.benchmark.json --pretty false && node benchmark/run-acceptance.mjs",
+    "build": "tsc -p tsconfig.json --pretty false",
+    "debug:service": "tsc -b tsconfig.debug.json --pretty false && node dist-debug/debug/cli.js",
+    "test": "tsc -p tsconfig.test.json --pretty false && vitest run",
+    "lint": "eslint src test debug benchmark --max-warnings=0"
+  },
+  "dependencies": {
+    "@benode/core": "0.0.0",
+    "@vscode/tree-sitter-wasm": "0.3.1"
+  }
+}

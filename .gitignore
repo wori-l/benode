@@ -1,0 +1,10 @@
+node_modules/
+dist/
+dist-debug/
+coverage/
+**/target/
+*.vsix
+*.vsix.manifest
+*.tsbuildinfo
+.DS_Store
+

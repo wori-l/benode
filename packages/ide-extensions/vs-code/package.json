@@ -1,0 +1,145 @@
+{
+  "name": "benode",
+  "displayName": "Benode",
+  "description": "Explore static call graphs for backend HTTP endpoints, locally and read-only.",
+  "publisher": "benode",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wori-l/benode.git",
+    "directory": "packages/ide-extensions/vs-code"
+  },
+  "homepage": "https://github.com/wori-l/benode/tree/main/packages/ide-extensions/vs-code#readme",
+  "bugs": {
+    "url": "https://github.com/wori-l/benode/issues"
+  },
+  "qna": "https://github.com/wori-l/benode/issues",
+  "categories": [
+    "Visualization"
+  ],
+  "keywords": [
+    "spring",
+    "spring boot",
+    "java",
+    "call graph",
+    "code visualization",
+    "endpoint",
+    "controller",
+    "local-first"
+  ],
+  "preview": true,
+  "pricing": "Free",
+  "icon": "resources/benode.png",
+  "galleryBanner": {
+    "color": "#172033",
+    "theme": "dark"
+  },
+  "type": "module",
+  "engines": {
+    "vscode": "^1.86.2"
+  },
+  "extensionKind": [
+    "workspace"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": {
+      "supported": false
+    }
+  },
+  "main": "./dist/extension.cjs",
+  "scripts": {
+    "build": "tsc -p tsconfig.json --pretty false && node scripts/build-extension.mjs",
+    "package:vsix": "node scripts/package-vsix.mjs",
+    "test": "tsc -p tsconfig.test.json --pretty false && vitest run",
+    "lint": "eslint src test scripts --max-warnings=0"
+  },
+  "dependencies": {
+    "@benode/core": "0.0.0",
+    "@benode/spring-java": "0.0.0",
+    "@vscode/tree-sitter-wasm": "0.3.1"
+  },
+  "devDependencies": {
+    "@types/vscode": "1.86.0"
+  },
+  "contributes": {
+    "configuration": {
+      "title": "Benode",
+      "properties": {
+        "benode.excludedPackages": {
+          "type": "array",
+          "scope": "resource",
+          "markdownDescription": "Parser-specific packages or classes excluded from graph construction. Use an exact qualified class name or a package prefix ending in `.*`.",
+          "default": [
+            { "parser": "spring-java", "package": "java.*" },
+            { "parser": "spring-java", "package": "javax.*" },
+            { "parser": "spring-java", "package": "jakarta.*" },
+            { "parser": "spring-java", "package": "org.springframework.*" },
+            { "parser": "spring-java", "package": "org.apache.*" }
+          ],
+          "items": {
+            "type": "object",
+            "required": [
+              "parser",
+              "package"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "parser": { "type": "string" },
+              "package": { "type": "string" }
+            }
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "benode.reindexWorkspace",
+        "title": "Benode: Reindex Workspace",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "benode.cleanAndReindexWorkspace",
+        "title": "Benode: Clean and Reindex Workspace",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "benode.showAnalysisDiagnostics",
+        "title": "Benode: Show Analysis Diagnostics",
+        "icon": "$(output)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "benode",
+          "title": "Benode",
+          "icon": "resources/benode.svg"
+        }
+      ]
+    },
+    "views": {
+      "benode": [
+        {
+          "id": "benode.applications",
+          "name": "Applications",
+          "icon": "resources/benode.svg"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "benode.reindexWorkspace",
+          "when": "view == benode.applications",
+          "group": "navigation"
+        }
+      ]
+    }
+  }
+}
