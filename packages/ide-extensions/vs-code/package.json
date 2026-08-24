@@ -79,7 +79,8 @@
             { "parser": "spring-java", "package": "javax.*" },
             { "parser": "spring-java", "package": "jakarta.*" },
             { "parser": "spring-java", "package": "org.springframework.*" },
-            { "parser": "spring-java", "package": "org.apache.*" }
+            { "parser": "spring-java", "package": "org.apache.*" },
+            { "parser": "spring-java", "package": "org.slf4j.*" }
           ],
           "items": {
             "type": "object",

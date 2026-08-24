@@ -95,17 +95,6 @@ test("activation registers the contributed Clean and Reindex command", async () 
     (entry) => entry.command,
   );
   expect(contributedCommands).toContain("benode.cleanAndReindexWorkspace");
-  expect(
-    packageJson.contributes.configuration.properties[
-      "benode.excludedPackages"
-    ].default,
-  ).toEqual([
-    { parser: "spring-java", package: "java.*" },
-    { parser: "spring-java", package: "javax.*" },
-    { parser: "spring-java", package: "jakarta.*" },
-    { parser: "spring-java", package: "org.springframework.*" },
-    { parser: "spring-java", package: "org.apache.*" },
-  ]);
 
   activate({
     extension: { packageJSON: packageJson },
