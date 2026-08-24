@@ -1,12 +1,10 @@
 package com.example.demo.models.payloads;
 
-public abstract class ModelC {
+public abstract class ModelC extends ModelD {
 
-    private String name;
+    public String name;
 
     public ModelC(String name) {
         this.name = name;
     }
-
-    public abstract String getName();
 }

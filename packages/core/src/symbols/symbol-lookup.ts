@@ -1,4 +1,5 @@
-import { memberKey } from "./symbol-keys.js";
+import { memberKey, variableKey } from "./symbol-keys.js";
+import { declaredSuperTypes } from "./type-metadata.js";
 import type {
   SymbolContext,
   SymbolIndex,
@@ -118,16 +119,110 @@ export function findTypeCandidates<Role extends string>(
     : local(index.typesBySimpleName.get(normalized) ?? []);
 }
 
+function methodParameterKey(
+  method: SymbolContext,
+  index: SymbolIndex,
+): string {
+  return (index.parametersByOwner.get(method.symbol.id) ?? [])
+    .map((parameter) => parameter.symbol.declaredType ?? "")
+    .join("\u0000");
+}
+
+function findMethodsInHierarchy<Role extends string>(
+  type: TypeContext<Role>,
+  memberName: string,
+  argumentCount: number,
+  index: SymbolIndex<Role>,
+  visited: Set<string>,
+  signatures: Set<string>,
+): readonly SymbolContext[] {
+  if (visited.has(type.symbol.id)) {
+    return [];
+  }
+  visited.add(type.symbol.id);
+
+  const declared = index.methodsByOwnerNameArity.get(
+    memberKey(type.symbol.id, memberName, argumentCount),
+  ) ?? [];
+  const methods = declared.filter((method) => {
+    const signature = methodParameterKey(method, index);
+    if (signatures.has(signature)) {
+      return false;
+    }
+    signatures.add(signature);
+    return true;
+  });
+  const inherited = declaredSuperTypes(type)
+    .flatMap((name) => findTypeCandidates(name, type, index))
+    .flatMap((parent) => findMethodsInHierarchy(
+      parent,
+      memberName,
+      argumentCount,
+      index,
+      visited,
+      signatures,
+    ));
+  return [...methods, ...inherited];
+}
+
 export function findMethods<Role extends string>(
   ownerTypes: readonly TypeContext<Role>[],
   memberName: string,
   argumentCount: number,
   index: SymbolIndex<Role>,
 ): readonly SymbolContext[] {
-  return ownerTypes.flatMap(
-    (type) =>
-      index.methodsByOwnerNameArity.get(
-        memberKey(type.symbol.id, memberName, argumentCount),
-      ) ?? [],
+  const methods = ownerTypes.flatMap((type) => findMethodsInHierarchy(
+    type,
+    memberName,
+    argumentCount,
+    index,
+    new Set(),
+    new Set(),
+  ));
+  return [...new Map(
+    methods.map((method) => [method.symbol.id, method]),
+  ).values()];
+}
+
+function findFieldsInHierarchy<Role extends string>(
+  type: TypeContext<Role>,
+  memberName: string,
+  index: SymbolIndex<Role>,
+  visited: Set<string>,
+): readonly SymbolContext[] {
+  if (visited.has(type.symbol.id)) {
+    return [];
+  }
+  visited.add(type.symbol.id);
+
+  const declared = index.variablesByScopeName.get(
+    variableKey(type.symbol.id, memberName),
   );
+  if (declared?.symbol.kind === "field") {
+    return [declared];
+  }
+  return declaredSuperTypes(type)
+    .flatMap((name) => findTypeCandidates(name, type, index))
+    .flatMap((parent) => findFieldsInHierarchy(
+      parent,
+      memberName,
+      index,
+      visited,
+    ));
+}
+
+export function findFields<Role extends string>(
+  ownerTypes: readonly TypeContext<Role>[],
+  memberName: string,
+  index: SymbolIndex<Role>,
+): readonly SymbolContext[] {
+  const fields = ownerTypes.flatMap((type) => findFieldsInHierarchy(
+    type,
+    memberName,
+    index,
+    new Set(),
+  ));
+  return [...new Map(
+    fields.map((field) => [field.symbol.id, field]),
+  ).values()];
 }

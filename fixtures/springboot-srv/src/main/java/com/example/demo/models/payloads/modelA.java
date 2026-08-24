@@ -10,4 +10,9 @@ public class ModelA extends ModelC {
     public String getName() {
         return this.name + " from ModelA";
     }
+
+    @Override
+    public void doSomething() {
+        System.out.println("Doing something in ModelA");
+    }
 }

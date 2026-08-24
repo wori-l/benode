@@ -91,7 +91,7 @@ describe("SpringWorkspaceAnalyzer", () => {
     }).analyze(REQUEST);
 
     expect(analysis.discovery.applications).toHaveLength(1);
-    expect(analysis.fileFacts).toHaveLength(20);
+    expect(analysis.fileFacts).toHaveLength(21);
     expect(analysis.frameworkIndex.applications).toEqual(
       analysis.discovery.applications,
     );
@@ -140,7 +140,7 @@ describe("SpringWorkspaceAnalyzer", () => {
     expect(cached.frameworkIndex).toEqual(cold.frameworkIndex);
     expect(cached.state).toEqual(cold.state);
     expect(cached.timings.indexedFiles).toBe(0);
-    expect(cached.timings.reusedFiles).toBe(20);
+    expect(cached.timings.reusedFiles).toBe(21);
     expect(fileSystem.searches).toBe(searchesAfterCold);
   });
 
@@ -166,7 +166,7 @@ describe("SpringWorkspaceAnalyzer", () => {
 
     expect(cachedRestart.frameworkIndex).toEqual(fresh.frameworkIndex);
     expect(cachedRestart.timings.indexedFiles).toBe(1);
-    expect(cachedRestart.timings.reusedFiles).toBe(19);
+    expect(cachedRestart.timings.reusedFiles).toBe(20);
   });
 
   it("keeps cold and incremental results equivalent across change, add, and delete", async () => {
@@ -194,7 +194,7 @@ describe("SpringWorkspaceAnalyzer", () => {
     let cold = await analyzer.analyze(REQUEST);
     expect(incremental.frameworkIndex).toEqual(cold.frameworkIndex);
     expect(incremental.timings.indexedFiles).toBe(1);
-    expect(incremental.timings.reusedFiles).toBe(19);
+    expect(incremental.timings.reusedFiles).toBe(20);
 
     const addedUri = testServiceFileUri(
       "src/main/java/com/example/demo/service/AddedService.java",
@@ -220,7 +220,7 @@ public class AddedService {
     });
     cold = await analyzer.analyze(REQUEST);
     expect(incremental.frameworkIndex).toEqual(cold.frameworkIndex);
-    expect(incremental.fileFacts).toHaveLength(21);
+    expect(incremental.fileFacts).toHaveLength(22);
 
     fileSystem.delete(addedUri);
     incremental = await analyzer.analyze(REQUEST, {
@@ -232,7 +232,7 @@ public class AddedService {
     });
     cold = await analyzer.analyze(REQUEST);
     expect(incremental.frameworkIndex).toEqual(cold.frameworkIndex);
-    expect(incremental.fileFacts).toHaveLength(20);
+    expect(incremental.fileFacts).toHaveLength(21);
   });
 
   it("rediscovers when an entry point candidate changes", async () => {

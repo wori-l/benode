@@ -273,6 +273,139 @@ describe("graph builder", () => {
     }));
   });
 
+  it("resolves inherited methods while preserving overrides and overloads", async () => {
+    const fileFacts = await indexJavaSnippet(
+      languageAdapter,
+      `
+        package com.example;
+
+        class Parent {
+          void inherited() {}
+          void action(String value) {}
+          void action(int value) {}
+        }
+        class Child extends Parent {
+          @Override void action(String value) {}
+        }
+        class Grandchild extends Child {}
+        class Consumer {
+          void run(Grandchild value) {
+            value.inherited();
+            value.action("text");
+            value.action(1);
+          }
+        }
+      `,
+    );
+    const entryPoint = fileFacts.symbols.find(
+      (symbol) => symbol.kind === "type",
+    );
+    if (entryPoint === undefined) {
+      throw new Error("The inheritance snippet has no type.");
+    }
+    const graph = buildGraph(createSymbolIndex({
+      applications: [{
+        id: fileFacts.applicationId,
+        name: "InheritedMethodGraphApplication",
+        rootUri: "fixture:///",
+        sourceRoots: ["fixture:///src/main/java"],
+        entryPoint: entryPoint.symbol,
+        sourceLocation: entryPoint.sourceLocation,
+      }],
+      fileFacts: [fileFacts],
+    }));
+    const symbolBySignature = new Map(
+      fileFacts.symbols.map((symbol) => [symbol.symbol.signature, symbol]),
+    );
+    const run = fileFacts.symbols.find(
+      (symbol) => symbol.kind === "method" && symbol.symbol.name === "run",
+    );
+    const targets = graph.edges
+      .filter((edge) => edge.sourceNodeId === run?.id)
+      .map((edge) => edge.targetNodeId);
+
+    expect(targets).toEqual(expect.arrayContaining([
+      symbolBySignature.get("com.example.Parent#method:inherited():void")?.id,
+      symbolBySignature.get("com.example.Child#method:action(String):void")?.id,
+      symbolBySignature.get("com.example.Parent#method:action(int):void")?.id,
+    ]));
+    expect(targets).not.toContain(
+      symbolBySignature.get("com.example.Parent#method:action(String):void")?.id,
+    );
+    expect(
+      graph.nodes.some((node) =>
+        node.symbol.qualifiedName === "unknown#inherited#inherited"
+      ),
+    ).toBe(false);
+  });
+
+  it("resolves fields inherited by direct and chained receivers", async () => {
+    const fileFacts = await indexJavaSnippet(
+      languageAdapter,
+      `
+        package com.example;
+
+        class Payload {
+          void touch() {}
+        }
+        class Parent {
+          Payload payload;
+        }
+        class Child extends Parent {
+          void direct() {
+            payload.touch();
+            this.payload.touch();
+          }
+        }
+        class Consumer {
+          void chained(Child child) {
+            child.payload.touch();
+          }
+        }
+      `,
+    );
+    const entryPoint = fileFacts.symbols.find(
+      (symbol) => symbol.kind === "type",
+    );
+    if (entryPoint === undefined) {
+      throw new Error("The inherited field snippet has no type.");
+    }
+    const graph = buildGraph(createSymbolIndex({
+      applications: [{
+        id: fileFacts.applicationId,
+        name: "InheritedFieldGraphApplication",
+        rootUri: "fixture:///",
+        sourceRoots: ["fixture:///src/main/java"],
+        entryPoint: entryPoint.symbol,
+        sourceLocation: entryPoint.sourceLocation,
+      }],
+      fileFacts: [fileFacts],
+    }));
+    const touch = fileFacts.symbols.find(
+      (symbol) =>
+        symbol.kind === "method" &&
+        symbol.symbol.qualifiedName === "com.example.Payload#touch",
+    );
+    const callers = fileFacts.symbols.filter(
+      (symbol) =>
+        symbol.kind === "method" &&
+        ["direct", "chained"].includes(symbol.symbol.name),
+    );
+
+    for (const caller of callers) {
+      expect(graph.edges).toContainEqual(expect.objectContaining({
+        sourceNodeId: caller.id,
+        targetNodeId: touch?.id,
+        confidence: "inferred",
+      }));
+    }
+    expect(
+      graph.nodes.some((node) =>
+        node.symbol.qualifiedName === "unknown#touch#touch"
+      ),
+    ).toBe(false);
+  });
+
   it("resolves super constructor invocations to the matching overload", async () => {
     const fileFacts = await indexJavaSnippet(
       languageAdapter,

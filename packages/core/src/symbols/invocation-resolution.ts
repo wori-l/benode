@@ -2,7 +2,7 @@ import type { InvocationFact } from "../contracts/contracts.js";
 import type { ResolutionConfidence } from "../contracts/model.js";
 import { constructorKey, variableKey } from "./symbol-keys.js";
 import {
-  findMethods, findTypeCandidates, ownerType, qualifiedTypeName,
+  findFields, findMethods, findTypeCandidates, ownerType, qualifiedTypeName,
 } from "./symbol-lookup.js";
 import type {
   ImplementationSelection, InvocationResolution, SymbolContext, SymbolIndex, TypeContext,
@@ -107,12 +107,7 @@ function inferredReceiverType<Role extends string>(
   let declaredType = rootType;
   let types = findTypeCandidates(declaredType, context, index);
   for (const memberName of invocation.receiverMemberPath ?? []) {
-    const fields = types.flatMap((type) => {
-      const field = index.variablesByScopeName.get(
-        variableKey(type.symbol.id, memberName),
-      );
-      return field?.symbol.kind === "field" ? [field] : [];
-    });
+    const fields = findFields(types, memberName, index);
     const field = fields[0];
     if (fields.length !== 1 || field?.symbol.declaredType == null) {
       return null;
@@ -235,13 +230,16 @@ export function resolveSymbolInvocation<Role extends string>(
         inferred.fallbackOwnerQualifiedName;
     }
   } else {
-    const variable =
-      index.variablesByScopeName.get(
-        variableKey(source.symbol.id, receiver),
-      ) ??
-      index.variablesByScopeName.get(
-        variableKey(enclosingType.symbol.id, receiver),
-      );
+    const scopedVariable = index.variablesByScopeName.get(
+      variableKey(source.symbol.id, receiver),
+    );
+    const ownType = index.typesById.get(enclosingType.symbol.id);
+    const inheritedFields = ownType === undefined
+      ? []
+      : findFields([ownType], receiver, index);
+    const variable = scopedVariable ?? (
+      inheritedFields.length === 1 ? inheritedFields[0] : undefined
+    );
     if (variable?.symbol.declaredType != null) {
       const declaredTypes = findTypeCandidates(
         variable.symbol.declaredType,

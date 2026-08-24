@@ -36,11 +36,14 @@ public class AnotherDemoService {
   public void test() {
     ModelA modelA = new ModelA("TestName");
     ModelB modelB = new ModelB("TestName");
+    modelA.doSomething();
+    modelB.doSomething();
+    modelB.surname.toUpperCase();
     testAbstract(modelA);
     testAbstract(modelB);
   }
 
-  private void testAbstract(ModelC model) {
+  private void testAbstract(ModelD model) {
     System.out.println(model.getName());
   }
 }

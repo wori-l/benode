@@ -373,6 +373,26 @@ describe("SpringBootFrameworkAdapter", () => {
         }),
         expect.objectContaining({
           source:
+            "com.example.demo.service.AnotherDemoService#test",
+          target:
+            "com.example.demo.models.payloads.ModelA#doSomething",
+          confidence: "inferred",
+        }),
+        expect.objectContaining({
+          source:
+            "com.example.demo.service.AnotherDemoService#test",
+          target:
+            "com.example.demo.models.payloads.ModelD#doSomething",
+          confidence: "inferred",
+        }),
+        expect.objectContaining({
+          source:
+            "com.example.demo.service.AnotherDemoService#test",
+          target: "java.lang.String#toUpperCase",
+          confidence: "inferred",
+        }),
+        expect.objectContaining({
+          source:
             "com.example.demo.service.AnotherDemoService#methodA",
           target:
             "com.example.demo.service.AnotherDemoService#methodB",
