@@ -400,4 +400,34 @@ describe("TreeSitterJavaAdapter", () => {
         .map((invocation) => invocation.argumentTypes),
     ).toEqual([["String"], ["int"], ["String"]]);
   });
+
+  it("infers receiver types from try resources and catch parameters", async () => {
+    const facts = await indexJava(`
+      package com.example.demo;
+      import java.io.IOException;
+      import java.io.InputStream;
+      class Demo {
+        void run() {
+          try (InputStream inputStream = open()) {
+            inputStream.read();
+          } catch (IOException error) {
+            error.printStackTrace();
+          }
+        }
+        InputStream open() { return null; }
+      }
+    `);
+
+    expect(
+      facts.invocations
+        .filter((invocation) =>
+          invocation.memberName === "read" ||
+          invocation.memberName === "printStackTrace"
+        )
+        .map(({ memberName, receiverType }) => ({ memberName, receiverType })),
+    ).toEqual([
+      { memberName: "read", receiverType: "InputStream" },
+      { memberName: "printStackTrace", receiverType: "IOException" },
+    ]);
+  });
 });

@@ -2,6 +2,7 @@ import type { IndexedSymbol } from "@benode/core";
 import type { Node } from "@vscode/tree-sitter-wasm";
 
 import {
+  directChildOfType,
   nearestAncestor,
   nonNullNodes,
   normalizeType,
@@ -50,13 +51,17 @@ function localVariableType(node: Node, name: string): string | null {
       "local_variable_declaration",
       "enhanced_for_statement",
       "catch_formal_parameter",
+      "resource",
     ]),
   )
     .filter((declaration) => declaration.startIndex < node.startIndex)
     .sort((left, right) => right.startIndex - left.startIndex);
 
   for (const declaration of declarations) {
-    const type = normalizeType(declaration.childForFieldName("type"));
+    const type = normalizeType(
+      declaration.childForFieldName("type") ??
+        directChildOfType(declaration, "catch_type"),
+    );
     if (type === null) {
       continue;
     }
