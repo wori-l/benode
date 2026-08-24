@@ -16,6 +16,9 @@ import {
   classifyLowSignalMethod,
 } from "./method-classifier.js";
 import { extractLombokMethods } from "./lombok-method-extractor.js";
+import {
+  extractLombokGeneratedMembers,
+} from "./lombok-generated-member-extractor.js";
 import type { SourceLocator } from "./source-locator.js";
 import type {
   CallableNode,
@@ -288,22 +291,30 @@ export function extractMembers(
     typeSymbols,
     fields,
   );
-  const implicitConstructors = extractImplicitConstructors(
-    input,
-    typeSymbols,
-    callables.symbols,
-  );
-  const lombokMethods = extractLombokMethods(
+  const lombokGeneratedMembers = extractLombokGeneratedMembers(
     input,
     imports,
     typeSymbols,
     fields,
     callables.symbols,
   );
+  const implicitConstructors = extractImplicitConstructors(
+    input,
+    typeSymbols,
+    [...callables.symbols, ...lombokGeneratedMembers],
+  );
+  const lombokMethods = extractLombokMethods(
+    input,
+    imports,
+    typeSymbols,
+    fields,
+    [...callables.symbols, ...lombokGeneratedMembers],
+  );
   return {
     symbols: [
       ...fields,
       ...callables.symbols,
+      ...lombokGeneratedMembers,
       ...implicitConstructors,
       ...lombokMethods,
     ],

@@ -7,7 +7,7 @@ import type {
 import { createSymbolId } from "./symbol-helpers.js";
 import type { JavaExtractionInput } from "./types.js";
 
-function findLombokAnnotation(
+export function findLombokAnnotation(
   symbol: IndexedSymbol,
   qualifiedName: string,
   imports: readonly ImportFact[],

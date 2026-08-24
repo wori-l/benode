@@ -1,5 +1,6 @@
 export const LOW_SIGNAL_METHOD_BEHAVIORS = [
   "trivialConstructor",
+  "trivialBuilder",
   "trivialGetter",
   "trivialSetter",
   "trivialFluentSetter",

@@ -90,6 +90,110 @@ describe("graph builder", () => {
       .toEqual(accessors.map((accessor) => accessor.id).sort());
   });
 
+  it("resolves Lombok constructors, logger, and builder members", async () => {
+    const fileFacts = await indexJavaSnippet(
+      languageAdapter,
+      `
+        package com.example;
+        import lombok.AllArgsConstructor;
+        import lombok.Builder;
+        import lombok.NoArgsConstructor;
+        import lombok.extern.slf4j.Slf4j;
+
+        @Slf4j
+        @Builder
+        @AllArgsConstructor
+        @NoArgsConstructor
+        class Payload {
+          private int id;
+          private String name;
+
+          void exercise() {
+            new Payload();
+            new Payload(1, "one");
+            log.info("building");
+            Payload.builder().id(2).name("two").build();
+          }
+        }
+      `,
+    );
+    const entryPoint = fileFacts.symbols.find(
+      (symbol) => symbol.kind === "type" && symbol.symbol.name === "Payload",
+    );
+    if (entryPoint === undefined) {
+      throw new Error("The Lombok snippet has no Payload type.");
+    }
+    const graph = buildGraph(createSymbolIndex({
+      applications: [{
+        id: fileFacts.applicationId,
+        name: "LombokGeneratedMembersApplication",
+        rootUri: "fixture:///",
+        sourceRoots: ["fixture:///src/main/java"],
+        entryPoint: entryPoint.symbol,
+        sourceLocation: entryPoint.sourceLocation,
+      }],
+      fileFacts: [fileFacts],
+    }));
+    const exercise = graph.nodes.find(
+      (node) => node.symbol.name === "exercise",
+    );
+    const targets = graph.edges
+      .filter((edge) => edge.sourceNodeId === exercise?.id)
+      .map((edge) => graph.nodes.find((node) => node.id === edge.targetNodeId));
+
+    expect(fileFacts.symbols.find(
+      (symbol) => symbol.kind === "field" && symbol.symbol.name === "log",
+    )).toMatchObject({
+      declaredType: "org.slf4j.Logger",
+      metadata: { generatedBy: "lombok", implicit: true },
+    });
+    expect(
+      fileFacts.symbols
+        .filter(
+          (symbol) =>
+            symbol.kind === "constructor" &&
+            symbol.ownerSymbolId === entryPoint.id,
+        )
+        .map((symbol) => symbol.symbol.signature)
+        .sort(),
+    ).toEqual([
+      "com.example.Payload#constructor()",
+      "com.example.Payload#constructor(int,String)",
+    ]);
+    expect(targets).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        symbol: expect.objectContaining({
+          signature: "com.example.Payload#constructor()",
+        }),
+      }),
+      expect.objectContaining({
+        symbol: expect.objectContaining({
+          signature: "com.example.Payload#constructor(int,String)",
+        }),
+      }),
+      expect.objectContaining({
+        symbol: expect.objectContaining({
+          qualifiedName: "org.slf4j.Logger#info",
+        }),
+        role: "external",
+        filterIds: ["external"],
+      }),
+      ...["builder", "id", "name", "build"].map((name) =>
+        expect.objectContaining({
+          symbol: expect.objectContaining({ name }),
+          filterIds: expect.arrayContaining(["trivial"]),
+          metadata: expect.objectContaining({
+            generatedBy: "lombok",
+            graphSignal: "low",
+            simplificationReason: "trivialBuilder",
+          }),
+        })
+      ),
+    ]));
+    expect(targets.some((target) => target?.role === "unresolved"))
+      .toBe(false);
+  });
+
   it("represents explicit and implicit constructors as low-signal method nodes", async () => {
     const fileFacts = await indexJavaSnippet(
       languageAdapter,

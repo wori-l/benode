@@ -261,6 +261,11 @@ describe("SpringBootFrameworkAdapter", () => {
         methods: ["GET"],
         paths: ["/demo-routing/test"],
       },
+      {
+        handler: "getExample",
+        methods: ["GET"],
+        paths: ["/lombok"],
+      },
     ]);
 
     const nodeById = new Map(
@@ -337,6 +342,26 @@ describe("SpringBootFrameworkAdapter", () => {
             "com.example.demo.controller.DemoController#getInnerClientMessage",
           target:
             "com.example.demo.service.NestedClientService#loadMessage",
+          confidence: "inferred",
+        }),
+        expect.objectContaining({
+          source:
+            "com.example.demo.controller.LombokController#getExample",
+          target: "com.example.demo.service.DemoService#hello",
+          confidence: "inferred",
+        }),
+        expect.objectContaining({
+          source:
+            "com.example.demo.controller.LombokController#getExample",
+          target:
+            "com.example.demo.controller.LombokController.LombokExample#getName",
+          confidence: "inferred",
+        }),
+        expect.objectContaining({
+          source:
+            "com.example.demo.controller.LombokController#getExample",
+          target:
+            "com.example.demo.controller.LombokController.LombokExample#setName",
           confidence: "inferred",
         }),
         expect.objectContaining({
