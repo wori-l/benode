@@ -2,8 +2,8 @@
   "name": "benode",
   "displayName": "Benode",
   "description": "Explore static call graphs for backend HTTP endpoints, locally and read-only.",
-  "publisher": "benode",
-  "version": "0.1.0",
+  "publisher": "wori-l",
+  "version": "0.1.1",
   "private": true,
   "license": "MIT",
   "repository": {
@@ -25,9 +25,8 @@
     "java",
     "call graph",
     "code visualization",
-    "endpoint",
-    "controller",
-    "local-first"
+    "developer tools",
+    "static analysis"
   ],
   "preview": true,
   "pricing": "Free",

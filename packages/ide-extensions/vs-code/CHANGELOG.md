@@ -1,6 +1,12 @@
 # Changelog
 
-All notable user-facing changes to Benode are documented in this file.
+
+## 0.1.1 - 2026-08-24
+
+- Improved resolution of Lombok methods and fields: `@AllArgsConstructor`, `@NoArgsConstructor`, `@Builder`, and `@Slf4j` are now handled correctly.
+- Fixed an issue where methods inside try-catch blocks could be incorrectly classified as unresolved.
+- Fixed an issue where inherited methods and fields could lead to nodes being incorrectly handled as unresolved.
+- `org.slf4j.*` is now an excluded package by default.
 
 ## 0.1.0 - 2026-08-22
 
